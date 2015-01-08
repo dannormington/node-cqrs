@@ -1,0 +1,11 @@
+{
+	  "name": "turnbasedgame",
+	    "description": "SimpleCQRS Node Example",
+		  "version": "0.0.1",
+		    "dependencies": {
+				    "express": "*",
+						"mongodb": "*",
+						"node-uuid": "*",
+						"body-parser": "*"
+					  }
+}
