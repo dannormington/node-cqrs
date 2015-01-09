@@ -9,12 +9,12 @@ var AttendeeRegistered = require('./domain/events/attendeeRegistered.js');
 var AttendeeEmailChanged = require('./domain/events/attendeeEmailChanged.js');
 var AttendeeChangeEmailConfirmed = require('./domain/events/attendeeChangeEmailConfirmed.js');
 
-var DataProvider = require('./infrastructure/query/dataProvider.js');
-var AttendeeRepository = require('./infrastructure/persistence/attendeeRepository.js');
+var DataProvider = require('./infrastructure/dataProvider.js');
+var AttendeeRepository = require('./infrastructure/attendeeRepository.js');
 var Attendee = require('./domain/attendee.js');
-var AttendeeHandler = require('./infrastructure/handlers/attendeeHandler.js')
+var AttendeeHandler = require('./infrastructure/attendeeHandler.js')
 
-var messageBus = require('./infrastructure/messaging/messageBus.js');
+var messageBus = require('./infrastructure/messageBus.js');
 
 var app = express();
 app.use(bodyParser.json());

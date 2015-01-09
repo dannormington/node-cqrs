@@ -1,5 +1,5 @@
 var Repository = require('./repository.js');
-var Attendee = require('../../domain/attendee.js');
+var Attendee = require('../domain/attendee.js');
 
 var util = require("util");
 

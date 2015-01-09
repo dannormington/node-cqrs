@@ -1,4 +1,4 @@
-var messageBus = require('../../infrastructure/messaging/messageBus.js');
+var messageBus = require('./messageBus.js');
 
 /*
 the purpose of this module is to manage
