@@ -1,5 +1,11 @@
 var EventEmitter = require('events').EventEmitter
 
+/*
+The purpose of this module is to provide
+base aggregate root functionality to
+to load an aggregate from an event stream and
+help manage state changes.
+*/
 function AggregateRoot(id){
   this._id = id;
   this._currentVersion = 0;

@@ -1,17 +1,12 @@
+var messageBus = require('../../infrastructure/messaging/messageBus.js');
 
+/*
+the purpose of this module is to manage
+the persistence and retrieval of events
+*/
 function EventStore(database){
 
   this._eventStore = database.collection("eventStore");
-
-  this.publishEvents = function(events){
-
-    if(!events || events.length == 0){
-      return;
-    }
-
-    //need to publish event to populate read models
-
-  };
 
 };
 
@@ -33,13 +28,17 @@ EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersio
 
         var currentVersion = aggregate.currentVersion;
 
-        //if the current aggregate's version doesn't match what we are expecting
-        //then back out. Somebody must have changed it.
+        /*
+        if the current aggregate's version doesn't match what we are expecting
+        then back out. Somebody must have changed it.
+        */
         if(aggregate.currentVersion && aggregate.currentVersion == loadedVersion){
 
-          //check if the events are null. This shouldn't happen
-          //since the first check above looks for null or
-          //empty events before even processing
+          /*
+          check if the events are null. This shouldn't happen
+          since the first check above looks for null or
+          empty events before even processing
+          */
           if(!aggregate.events){
             aggregate.events = [];
           }
@@ -59,9 +58,8 @@ EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersio
               if(err){
                 callback(err, false)
               }else{
+                messageBus.publish(events);
                 callback(null, true);
-
-                this.publishEvents(events);
               }
 
             }.bind(this));
@@ -72,17 +70,19 @@ EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersio
 
       }else{
 
-        //normally the currentVersion would be 1 for a new aggregate
-        //but it is possible that multiple events were needed so we will
-        //assign the currentVersion to the length of the events array
+        /*
+        normally the currentVersion would be 1 for a new aggregate
+        but it is possible that multiple events were needed so we will
+        assign the currentVersion to the length of the events array
+        */
         this._eventStore.insert({aggregateId: aggregateId,currentVersion: events.length, events: events},
-          function(error, result){
+          function(err, result){
 
             if(err){
               callback(err, false)
             }else{
+              messageBus.publish(events);
               callback(null, true);
-              this.publishEvents(events);
             }
           }.bind(this));
       }

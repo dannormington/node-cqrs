@@ -1,5 +1,9 @@
 var EventStore = require('./eventStore.js');
 
+/*
+The purpose of this module is to provide
+base repository functionality.
+*/
 function Repository(database){
   this._eventStore = new EventStore(database);
 };

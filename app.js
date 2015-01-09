@@ -1,15 +1,27 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 
+var MongoClient = require('mongodb').MongoClient;
+var Server = require('mongodb').Server;
+
+//define the events to subsribe to
+var AttendeeRegistered = require('./domain/events/attendeeRegistered.js');
+var AttendeeEmailChanged = require('./domain/events/attendeeEmailChanged.js');
+var AttendeeChangeEmailConfirmed = require('./domain/events/attendeeChangeEmailConfirmed.js');
+
 var DataProvider = require('./infrastructure/query/dataProvider.js');
 var AttendeeRepository = require('./infrastructure/persistence/attendeeRepository.js');
 var Attendee = require('./domain/attendee.js');
+var AttendeeHandler = require('./infrastructure/handlers/attendeeHandler.js')
+
+var messageBus = require('./infrastructure/messaging/messageBus.js');
 
 var app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
-var MongoClient = require('mongodb').MongoClient;
-var Server = require('mongodb').Server;
 var db;
+var attendeeHandler;
 
 // Initialize connection once
 MongoClient.connect("mongodb://localhost:27017/nodeSimpleCQRSExample", function(err, database) {
@@ -17,20 +29,27 @@ MongoClient.connect("mongodb://localhost:27017/nodeSimpleCQRSExample", function(
 
   db = database;
 
-  // Start the application after the database connection is ready
+  //create an instance of the event handler
+  attendeeHandler = new AttendeeHandler(db);
+
+  //subscribe the handlers to the domain events
+  messageBus.subscribe(AttendeeRegistered.EVENT, attendeeHandler.handleAttendeeRegistered);
+  messageBus.subscribe(AttendeeEmailChanged.EVENT, attendeeHandler.handleAttendeeEmailChanged);
+  messageBus.subscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeHandler.handleAttendeeChangeEmailConfirmed);
+
   app.listen(process.env.PORT || 4730);
-  console.log("app is listening");
 });
 
 app.on('close', function () {
-  //perform any clean-up
-  console.log("Closed");
+
+  //unsubscribe the handlers
+  messageBus.unsubscribe(AttendeeRegistered.EVENT, attendeeHandler.handleAttendeeRegistered);
+  messageBus.unsubscribe(AttendeeEmailChanged.EVENT, attendeeHandler.handleAttendeeEmailChanged);
+  messageBus.unsubscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeHandler.handleAttendeeChangeEmailConfirmed);
 });
 
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
+//register an attendee
 app.post('/attendees/register', function(req, res){
 
   res.type('text/plain');
@@ -53,6 +72,7 @@ app.post('/attendees/register', function(req, res){
   });
 });
 
+//change the attendee's email
 app.post('/attendees/:id/changeemail', function(req, res){
 
   res.type('text/plain');
@@ -80,6 +100,7 @@ app.post('/attendees/:id/changeemail', function(req, res){
 
 });
 
+//Confirm the email address
 app.post('/attendees/:id/confirmchangeemail', function(req, res){
 
   res.type('text/plain');

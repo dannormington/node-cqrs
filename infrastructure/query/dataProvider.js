@@ -1,3 +1,8 @@
+/*
+The purpose of this module is to provide
+a series of methods to retieve attendee based
+read models.
+*/
 function DataProvider(database){
   this._attendees = database.collection("attendees");
 };

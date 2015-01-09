@@ -8,17 +8,25 @@ var uuid = require("node-uuid");
 
 util.inherits(Attendee, AggregateRoot);
 
+/*
+The purpose of this module to to help
+manage state changes for an attendee
+*/
 function Attendee(id){
 
   AggregateRoot.call(this, id);
 
-  //represents the confirmation Id created
-  //when an attendee changes their email address.
-  //only the most recent Id is kept in state
+  /*
+  represents the confirmation Id created
+  when an attendee changes their email address.
+  only the most recent Id is kept in state
+  */
   this._confirmationId = null;
 
-  //represents the most recent unconfirmed email address
-  //that the attendee changed in the system.
+  /*
+  represents the most recent unconfirmed email address
+  that the attendee changed in the system.
+  */
   this._unconfirmedEmail = null;
 
   this.onEvent(AttendeeEmailChanged.EVENT, function(event) {
