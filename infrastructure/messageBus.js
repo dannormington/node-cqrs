@@ -8,14 +8,9 @@ approach
 */
 function MessageBus(){
 
-  if(arguments.callee._singletonInstance){
-    return arguments.callee._singletonInstance;
-  }
-
   console.log("creating message bus instance");
 
   this._emitter = new EventEmitter();
-  arguments.callee._singletonInstance = this;
 }
 
 MessageBus.prototype.publish = function(events){
@@ -46,6 +41,5 @@ MessageBus.prototype.unsubscribe = function(eventName, listener){
 
   this._emitter.removeListener(eventName, listener);
 };
-
 
 module.exports = new MessageBus();
