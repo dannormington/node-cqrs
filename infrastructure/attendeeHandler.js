@@ -66,7 +66,7 @@ function AttendeeHandler(database){
     }.bind(this));
   }.bind(this);
 
-};
+}
 
 
 module.exports = AttendeeHandler;

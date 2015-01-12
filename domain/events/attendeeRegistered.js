@@ -12,6 +12,6 @@ function AttendeeRegistered(attendeeId, firstName, lastName, email){
   this.firstName = firstName;
   this.lastName = lastName;
 
-};
+}
 
 module.exports = AttendeeRegistered;

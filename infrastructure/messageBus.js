@@ -16,7 +16,7 @@ function MessageBus(){
 
   this._emitter = new EventEmitter();
   arguments.callee._singletonInstance = this;
-};
+}
 
 MessageBus.prototype.publish = function(events){
 

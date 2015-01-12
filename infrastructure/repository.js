@@ -6,7 +6,7 @@ base repository functionality.
 */
 function Repository(database){
   this._eventStore = new EventStore(database);
-};
+}
 
 Repository.prototype.save = function(aggregateRoot, callback){
 
@@ -17,7 +17,7 @@ Repository.prototype.save = function(aggregateRoot, callback){
 
   this._eventStore.saveEvents(id, loadedVersion, currentVersion, events, function(err, result){
 
-    if(err == null && result){
+    if(!err && result){
       aggregateRoot.markChangesAsCommitted();
     }
 

@@ -35,21 +35,21 @@ function Attendee(id){
     this._unconfirmedEmail = event.email;
   }.bind(this));
 
-  this.onEvent(AttendeeChangeEmailConfirmed.EVENT, function(event) {
+  this.onEvent(AttendeeChangeEmailConfirmed.EVENT, function(/*event*/) {
     //reset the Id and email to null since the confirmation has occurred
     this._confirmationId = null;
     this._unconfirmedEmail = null;
   }.bind(this));
 
-};
+}
 
 Attendee.prototype.init = function(firstName, lastName, email){
 
   //validate that first, last and email all contain something
-  if(!firstName || !lastName || !email
-    || firstName.trim().length == 0
-    || lastName.trim().length == 0
-    || email.trim().length == 0){
+  if(!firstName || !lastName || !email ||
+      firstName.trim().length === 0 ||
+      lastName.trim().length === 0 ||
+      email.trim().length === 0){
     return null;
   }
 
@@ -70,7 +70,7 @@ Attendee.prototype.changeEmail = function(email){
 
 Attendee.prototype.confirmChangeEmail = function(confirmationId){
 
-  if(confirmationId == this._confirmationId){
+  if(confirmationId === this._confirmationId){
     this.applyChange(new AttendeeChangeEmailConfirmed(this.getId(), confirmationId, this._unconfirmedEmail));
   }
 

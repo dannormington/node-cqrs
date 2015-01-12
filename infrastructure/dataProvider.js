@@ -5,7 +5,7 @@ read models.
 */
 function DataProvider(database){
   this._attendees = database.collection("attendees");
-};
+}
 
 
 DataProvider.prototype.getAttendee = function(attendeeId, callback){

@@ -1,4 +1,4 @@
-var EventEmitter = require('events').EventEmitter
+var EventEmitter = require('events').EventEmitter;
 
 /*
 The purpose of this module is to provide
@@ -12,7 +12,7 @@ function AggregateRoot(id){
   this._loadedVersion = 0;
   this._uncommittedChanges = [];
   this._eventEmitter = new EventEmitter();
-};
+}
 
 AggregateRoot.prototype.getId = function(){
   return this._id;
@@ -61,7 +61,7 @@ AggregateRoot.prototype.markChangesAsCommitted = function(){
     var numberOfEvents = this._uncommittedChanges.length;
 
     //clear the elements from the array
-    for(index = 0; index < numberOfEvents; index++){
+    for(var index = 0; index < numberOfEvents; index++){
       this._uncommittedChanges.shift();
     }
   }
