@@ -11,6 +11,6 @@ function AttendeeEmailChanged(confirmationId, attendeeId, email){
   this.email = email;
   this.confirmationId = confirmationId;
 
-};
+}
 
 module.exports = AttendeeEmailChanged;

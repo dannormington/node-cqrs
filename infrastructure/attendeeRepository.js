@@ -11,7 +11,7 @@ ability to load and save an attendee aggregate
 */
 function AttendeeRepository(database){
   Repository.call(this, database);
-};
+}
 
 AttendeeRepository.prototype.getById = function(attendeeId, callback){
 

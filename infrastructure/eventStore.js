@@ -8,12 +8,12 @@ function EventStore(database){
 
   this._eventStore = database.collection("eventStore");
 
-};
+}
 
 EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersion, events, callback){
 
   //no need to process if there aren't any events
-  if(!events || events.length == 0){
+  if(!events || events.length === 0){
     callback(null, true);
     return;
   }
@@ -32,7 +32,7 @@ EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersio
         if the current aggregate's version doesn't match what we are expecting
         then back out. Somebody must have changed it.
         */
-        if(aggregate.currentVersion && aggregate.currentVersion == loadedVersion){
+        if(aggregate.currentVersion && aggregate.currentVersion === loadedVersion){
 
           /*
           check if the events are null. This shouldn't happen
@@ -56,7 +56,7 @@ EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersio
             function(err, result){
 
               if(err){
-                callback(err, false)
+                callback(err, false);
               }else{
                 messageBus.publish(events);
                 callback(null, true);
@@ -79,7 +79,7 @@ EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersio
           function(err, result){
 
             if(err){
-              callback(err, false)
+              callback(err, false);
             }else{
               messageBus.publish(events);
               callback(null, true);
