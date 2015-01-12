@@ -4,7 +4,7 @@ a series of methods to retieve attendee based
 read models.
 */
 function DataProvider(database){
-  this._attendees = database.collection("attendees");
+  this._attendees = database.collection("attendee");
 }
 
 

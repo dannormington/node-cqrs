@@ -4,7 +4,7 @@ attendee based events by populating the read models
 */
 function AttendeeHandler(database){
 
-  this._attendees = database.collection("attendees");
+  this._attendees = database.collection("attendee");
 
   /*
   handle the attendee registered event by
