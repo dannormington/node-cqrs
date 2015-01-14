@@ -10,7 +10,7 @@ function EventStore(database){
 
 }
 
-EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersion, events, callback){
+EventStore.prototype.saveEvents = function(aggregateId, version, events, callback){
 
   //no need to process if there aren't any events
   if(!events || events.length === 0){
@@ -23,6 +23,14 @@ EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersio
     if(err){
       callback(err,false);
     }else{
+      
+      //assign the versions to the events
+      var currentEventVersion = version;
+      events.forEach(function(event){
+        currentEventVersion++
+        event.version = currentEventVersion;
+      });
+
 
       if(aggregate){
 
@@ -32,7 +40,7 @@ EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersio
         if the current aggregate's version doesn't match what we are expecting
         then back out. Somebody must have changed it.
         */
-        if(aggregate.currentVersion && aggregate.currentVersion === loadedVersion){
+        if(aggregate.currentVersion && aggregate.currentVersion === version){
 
           /*
           check if the events are null. This shouldn't happen
@@ -43,16 +51,16 @@ EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersio
             aggregate.events = [];
           }
 
-          //add all events
+          //append the events to the aggregate stream
           events.forEach(function(event){
             aggregate.events.push(event);
           });
 
-          //update the current version version
-          aggregate.currentVersion = newVersion;
+          //update the current version of the aggregate document
+          aggregate.currentVersion = version + events.length;
 
           //update the document where the aggregate id matches and the version matches
-          this._eventStore.update({aggregateId: aggregateId, currentVersion: loadedVersion}, aggregate,
+          this._eventStore.update({aggregateId: aggregateId, currentVersion: version}, aggregate,
             function(err, result){
 
               if(err){
@@ -69,13 +77,12 @@ EventStore.prototype.saveEvents = function(aggregateId, loadedVersion, newVersio
         }
 
       }else{
-
         /*
         normally the currentVersion would be 1 for a new aggregate
         but it is possible that multiple events were needed so we will
         assign the currentVersion to the length of the events array
         */
-        this._eventStore.insert({aggregateId: aggregateId,currentVersion: events.length, events: events},
+        this._eventStore.insert({aggregateId: aggregateId, currentVersion: events.length, events: events},
           function(err, result){
 
             if(err){

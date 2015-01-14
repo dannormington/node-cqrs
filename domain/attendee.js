@@ -62,8 +62,7 @@ Attendee.prototype.changeEmail = function(email){
 
   //validate the email exists
   if(email && email.trim().length > 0){
-    var confirmationId = uuid.v4();
-    this.applyChange(new AttendeeEmailChanged(confirmationId, this.getId(), email));
+    this.applyChange(new AttendeeEmailChanged(uuid.v4(), this.getId(), email));
   }
 
 };

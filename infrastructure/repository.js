@@ -11,11 +11,10 @@ function Repository(database){
 Repository.prototype.save = function(aggregateRoot, callback){
 
   var id = aggregateRoot.getId();
-  var currentVersion = aggregateRoot.getCurrentVersion();
-  var loadedVersion = aggregateRoot.getLoadedVersion();
+  var version = aggregateRoot.getVersion();
   var events = aggregateRoot.getUncommittedChanges();
 
-  this._eventStore.saveEvents(id, loadedVersion, currentVersion, events, function(err, result){
+  this._eventStore.saveEvents(id, version, events, function(err, result){
 
     if(!err && result){
       aggregateRoot.markChangesAsCommitted();

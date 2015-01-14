@@ -8,8 +8,7 @@ help manage state changes.
 */
 function AggregateRoot(id){
   this._id = id;
-  this._currentVersion = 0;
-  this._loadedVersion = 0;
+  this._version = 0;
   this._uncommittedChanges = [];
   this._eventEmitter = new EventEmitter();
 }
@@ -24,9 +23,8 @@ AggregateRoot.prototype.loadFromHistory = function(events){
       //hydrate all state by emitting the event to the listeners
       this._eventEmitter.emit(event.name, event);
 
-      //increment the loaded and current version
-      this._currentVersion++;
-      this._loadedVersion++;
+      //increment the version
+      this._version++;
 
     }.bind(this));
   }
@@ -36,20 +34,11 @@ AggregateRoot.prototype.getUncommittedChanges = function(){
   return this._uncommittedChanges;
 };
 
-AggregateRoot.prototype.getCurrentVersion = function(){
-  return this._currentVersion;
-};
-
-AggregateRoot.prototype.getLoadedVersion = function(){
-  return this._loadedVersion;
+AggregateRoot.prototype.getVersion = function(){
+  return this._version;
 };
 
 AggregateRoot.prototype.applyChange = function(event){
-
-  //increment the version and assign to the event
-  this._currentVersion++;
-  event.version = this._currentVersion;
-
   this._uncommittedChanges.push(event);
   this._eventEmitter.emit(event.name, event);
 };
@@ -59,6 +48,8 @@ AggregateRoot.prototype.markChangesAsCommitted = function(){
   if(this._uncommittedChanges){
 
     var numberOfEvents = this._uncommittedChanges.length;
+
+    this._version += numberOfEvents;
 
     //clear the elements from the array
     for(var index = 0; index < numberOfEvents; index++){
