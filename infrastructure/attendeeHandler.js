@@ -21,9 +21,10 @@ function AttendeeHandler(database){
       email: event.email
     };
 
-    this._attendees.insert(attendee, function(err, result){
+    this._attendees.insert(attendee, function(err){
       if(err){
-        //log the error
+        //log the error. For now just log to the console
+        console.log(err);
       }
     });
 
@@ -52,13 +53,15 @@ function AttendeeHandler(database){
     this._attendees.findOne({attendeeId:event.aggregateId}, function(err, attendee){
       if(err){
         //log the error
+        console.log(err);
       }else{
         if(attendee){
           attendee.email = event.email;
 
-          this._attendees.update({attendeeId:event.aggregateId}, attendee, function(err, results){
+          this._attendees.update({attendeeId:event.aggregateId}, attendee, function(err){
             if(err){
-              //log the error
+              //log the error. For now just log to the console
+              console.log(err);
             }
           });
         }

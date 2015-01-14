@@ -71,7 +71,7 @@ EventStore.prototype.saveEvents = function(aggregateId, version, events, callbac
             }.bind(this));
 
         }else{
-          callback(new Error("Data has been changed between loading and state changes."), null);
+          callback(new Error("Data has been changed between loading and state changes."), false);
         }
 
       }else{
@@ -111,6 +111,5 @@ EventStore.prototype.getEvents = function(aggregateId, callback){
   });
 
 };
-
 
 module.exports = EventStore;
