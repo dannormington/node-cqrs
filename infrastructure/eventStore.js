@@ -23,18 +23,16 @@ EventStore.prototype.saveEvents = function(aggregateId, version, events, callbac
     if(err){
       callback(err,false);
     }else{
-      
+
       //assign the versions to the events
       var currentEventVersion = version;
       events.forEach(function(event){
-        currentEventVersion++
+        currentEventVersion++;
         event.version = currentEventVersion;
       });
 
 
       if(aggregate){
-
-        var currentVersion = aggregate.currentVersion;
 
         /*
         if the current aggregate's version doesn't match what we are expecting
@@ -61,7 +59,7 @@ EventStore.prototype.saveEvents = function(aggregateId, version, events, callbac
 
           //update the document where the aggregate id matches and the version matches
           this._eventStore.update({aggregateId: aggregateId, currentVersion: version}, aggregate,
-            function(err, result){
+            function(err){
 
               if(err){
                 callback(err, false);
@@ -83,7 +81,7 @@ EventStore.prototype.saveEvents = function(aggregateId, version, events, callbac
         assign the currentVersion to the length of the events array
         */
         this._eventStore.insert({aggregateId: aggregateId, currentVersion: events.length, events: events},
-          function(err, result){
+          function(err){
 
             if(err){
               callback(err, false);
