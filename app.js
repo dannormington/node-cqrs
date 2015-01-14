@@ -54,20 +54,31 @@ app.post('/attendees/register', function(req, res){
 
   res.type('text/plain');
 
+  //validate the command
+  if(!req.body.firstName || !req.body.lastName || !req.body.email || !req.body.id ||
+    req.body.firstName.trim().length === 0 ||
+    req.body.lastName.trim().length === 0 ||
+    req.body.email.trim().length === 0){
+
+      res.status(400).send('invalid parameters');
+      return;
+  }
+
   var id = req.body.id;
   var email = req.body.email;
   var lastName = req.body.lastName;
   var firstName = req.body.firstName;
 
   var attendee = new Attendee(id).init(firstName, lastName, email);
+
   var repository = new AttendeeRepository(db);
 
   repository.save(attendee, function(err, result){
 
     if(err){
-      res.send(err.message);
+      res.status(500).send(err.message);
     }else{
-      res.send(result.toString());
+      res.send('Attendee Registered');
     }
   });
 });
@@ -77,6 +88,12 @@ app.post('/attendees/:id/changeemail', function(req, res){
 
   res.type('text/plain');
 
+  //validate the command
+  if(!req.body.email || req.body.email.trim().length === 0){
+    res.status(400).send('invalid parameters');
+    return;
+  }
+
   var id = parseInt(req.params.id);
   var email = req.body.email;
 
@@ -84,13 +101,14 @@ app.post('/attendees/:id/changeemail', function(req, res){
 
   repository.getById(id, function(err, attendee){
     if(err){
-      res.send(err.message);
+      res.status(500).send(err.message);
     }else{
+
       attendee.changeEmail(email);
 
       repository.save(attendee, function(err, result){
         if(err){
-          res.send(err.message)
+          res.status(500).send(err.message)
         }else{
           res.send('email changed.');
         }
@@ -105,6 +123,12 @@ app.post('/attendees/:id/confirmchangeemail', function(req, res){
 
   res.type('text/plain');
 
+  //validate the command
+  if(!req.body.confirmationId || req.body.confirmationId.trim().length === 0){
+    res.status(400).send('invalid parameters');
+    return;
+  }
+
   var id = parseInt(req.params.id);
   var confirmationId = req.body.confirmationId;
 
@@ -112,14 +136,14 @@ app.post('/attendees/:id/confirmchangeemail', function(req, res){
 
   repository.getById(id, function(err, attendee){
     if(err){
-      res.send(err.message);
+      res.status(500).send(err.message);
     }else{
 
       attendee.confirmChangeEmail(confirmationId);
 
       repository.save(attendee, function(err, result){
         if(err){
-          res.send(err.message)
+          res.status(500).send(err.message)
         }else{
           res.send('email change confirmed.');
         }
