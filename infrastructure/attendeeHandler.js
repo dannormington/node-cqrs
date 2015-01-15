@@ -38,7 +38,8 @@ function AttendeeHandler(database){
   this.handleAttendeeEmailChanged = function(event){
     console.log("handling " + event.name);
 
-    //send email with confirmationId
+    //send email with confirmationId to the attendee's new email
+
   };
 
   /*
@@ -68,6 +69,18 @@ function AttendeeHandler(database){
       }
     }.bind(this));
   }.bind(this);
+
+  /*
+  handle the event that is published when a user attempts to
+  confirm a changed email address when the confirmation Id does
+  not match the most recent email change request
+  */
+  this.handleAttendeeConfirmChangeEmailFailed = function(event){
+
+    console.log("handling " + event.name);
+
+    //send an email to the attendee informing them that the confirmation failed.
+  };
 
 }
 

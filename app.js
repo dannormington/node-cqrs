@@ -2,17 +2,17 @@ var express = require('express');
 var bodyParser = require('body-parser');
 
 var MongoClient = require('mongodb').MongoClient;
-var Server = require('mongodb').Server;
 
 //define the events to subsribe to
 var AttendeeRegistered = require('./domain/events/attendeeRegistered.js');
 var AttendeeEmailChanged = require('./domain/events/attendeeEmailChanged.js');
 var AttendeeChangeEmailConfirmed = require('./domain/events/attendeeChangeEmailConfirmed.js');
+var AttendeeConfirmChangeEmailFailed = require('./domain/events/attendeeConfirmChangeEmailFailed.js');
 
 var DataProvider = require('./infrastructure/dataProvider.js');
 var AttendeeRepository = require('./infrastructure/attendeeRepository.js');
 var Attendee = require('./domain/attendee.js');
-var AttendeeHandler = require('./infrastructure/attendeeHandler.js')
+//
 
 var messageBus = require('./infrastructure/messageBus.js');
 
@@ -25,9 +25,13 @@ var attendeeHandler;
 
 // Initialize connection once
 MongoClient.connect("mongodb://localhost:27017/nodeSimpleCQRSExample", function(err, database) {
-  if(err) throw err;
+  if(err){
+    throw err;
+  }
 
   db = database;
+
+  var AttendeeHandler = require('./infrastructure/attendeeHandler.js');
 
   //create an instance of the event handler
   attendeeHandler = new AttendeeHandler(db);
@@ -36,6 +40,7 @@ MongoClient.connect("mongodb://localhost:27017/nodeSimpleCQRSExample", function(
   messageBus.subscribe(AttendeeRegistered.EVENT, attendeeHandler.handleAttendeeRegistered);
   messageBus.subscribe(AttendeeEmailChanged.EVENT, attendeeHandler.handleAttendeeEmailChanged);
   messageBus.subscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeHandler.handleAttendeeChangeEmailConfirmed);
+  messageBus.subscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeHandler.handleAttendeeConfirmChangeEmailFailed);
 
   app.listen(process.env.PORT || 4730);
 });
@@ -46,6 +51,8 @@ app.on('close', function () {
   messageBus.unsubscribe(AttendeeRegistered.EVENT, attendeeHandler.handleAttendeeRegistered);
   messageBus.unsubscribe(AttendeeEmailChanged.EVENT, attendeeHandler.handleAttendeeEmailChanged);
   messageBus.unsubscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeHandler.handleAttendeeChangeEmailConfirmed);
+  messageBus.unsubscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeHandler.handleAttendeeConfirmChangeEmailFailed);
+
 });
 
 
@@ -73,7 +80,7 @@ app.post('/attendees/register', function(req, res){
 
   var repository = new AttendeeRepository(db);
 
-  repository.save(attendee, function(err, result){
+  repository.save(attendee, function(err){
 
     if(err){
       res.status(500).send(err.message);
@@ -106,9 +113,9 @@ app.post('/attendees/:id/changeemail', function(req, res){
 
       attendee.changeEmail(email);
 
-      repository.save(attendee, function(err, result){
+      repository.save(attendee, function(err){
         if(err){
-          res.status(500).send(err.message)
+          res.status(500).send(err.message);
         }else{
           res.send('email changed.');
         }
@@ -141,9 +148,9 @@ app.post('/attendees/:id/confirmchangeemail', function(req, res){
 
       attendee.confirmChangeEmail(confirmationId);
 
-      repository.save(attendee, function(err, result){
+      repository.save(attendee, function(err){
         if(err){
-          res.status(500).send(err.message)
+          res.status(500).send(err.message);
         }else{
           res.send('email change confirmed.');
         }

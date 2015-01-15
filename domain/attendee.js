@@ -2,6 +2,7 @@ var AggregateRoot = require('./aggregateRoot.js');
 var AttendeeRegistered = require('./events/attendeeRegistered.js');
 var AttendeeEmailChanged = require('./events/attendeeEmailChanged.js');
 var AttendeeChangeEmailConfirmed = require('./events/attendeeChangeEmailConfirmed.js');
+var AttendeeConfirmChangeEmailFailed = require('./events/attendeeConfirmChangeEmailFailed.js');
 
 var util = require("util");
 var uuid = require("node-uuid");
@@ -71,6 +72,8 @@ Attendee.prototype.confirmChangeEmail = function(confirmationId){
 
   if(confirmationId === this._confirmationId){
     this.applyChange(new AttendeeChangeEmailConfirmed(this.getId(), confirmationId, this._unconfirmedEmail));
+  }else{
+    this.applyChange(new AttendeeConfirmChangeEmailFailed(this.getId(), confirmationId));
   }
 
 };
