@@ -9,8 +9,8 @@ util.inherits(AttendeeRepository, Repository);
 The purpose of this module is to provide the
 ability to load and save an attendee aggregate
 */
-function AttendeeRepository(database){
-  Repository.call(this, database);
+function AttendeeRepository(){
+  Repository.call(this);
 }
 
 AttendeeRepository.prototype.getById = function(attendeeId, callback){

@@ -1,12 +1,13 @@
 var messageBus = require('./messageBus.js');
+var database = require('./database.js');
 
 /*
 the purpose of this module is to manage
 the persistence and retrieval of events
 */
-function EventStore(database){
+function EventStore(){
 
-  this._eventStore = database.collection("eventStore");
+  this._eventStore = database.getCollection("eventStore");
 
 }
 

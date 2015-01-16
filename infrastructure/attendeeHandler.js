@@ -1,10 +1,12 @@
+var database = require('./database.js');
+
 /*
 The  purpose of this module is to handle
 attendee based events by populating the read models
 */
-function AttendeeHandler(database){
+function AttendeeHandler(){
 
-  this._attendees = database.collection("attendee");
+  this._attendees = database.getCollection("attendee");
 
   /*
   handle the attendee registered event by
@@ -83,6 +85,5 @@ function AttendeeHandler(database){
   };
 
 }
-
 
 module.exports = AttendeeHandler;

@@ -1,40 +1,36 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 
-var MongoClient = require('mongodb').MongoClient;
-
 //define the events to subsribe to
 var AttendeeRegistered = require('./domain/events/attendeeRegistered.js');
 var AttendeeEmailChanged = require('./domain/events/attendeeEmailChanged.js');
 var AttendeeChangeEmailConfirmed = require('./domain/events/attendeeChangeEmailConfirmed.js');
 var AttendeeConfirmChangeEmailFailed = require('./domain/events/attendeeConfirmChangeEmailFailed.js');
 
-var DataProvider = require('./infrastructure/dataProvider.js');
+var AttendeeDataProvider = require('./infrastructure/attendeeDataProvider.js');
 var AttendeeRepository = require('./infrastructure/attendeeRepository.js');
 var Attendee = require('./domain/attendee.js');
-//
 
 var messageBus = require('./infrastructure/messageBus.js');
+var database = require('./infrastructure/database.js');
 
 var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-var db;
 var attendeeHandler;
+var server;
 
-// Initialize connection once
-MongoClient.connect("mongodb://localhost:27017/nodeSimpleCQRSExample", function(err, database) {
+database.connect(function(err){
+
   if(err){
     throw err;
   }
 
-  db = database;
-
   var AttendeeHandler = require('./infrastructure/attendeeHandler.js');
 
   //create an instance of the event handler
-  attendeeHandler = new AttendeeHandler(db);
+  attendeeHandler = new AttendeeHandler();
 
   //subscribe the handlers to the domain events
   messageBus.subscribe(AttendeeRegistered.EVENT, attendeeHandler.handleAttendeeRegistered);
@@ -42,18 +38,64 @@ MongoClient.connect("mongodb://localhost:27017/nodeSimpleCQRSExample", function(
   messageBus.subscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeHandler.handleAttendeeChangeEmailConfirmed);
   messageBus.subscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeHandler.handleAttendeeConfirmChangeEmailFailed);
 
-  app.listen(process.env.PORT || 4730);
+  server = app.listen(process.env.PORT || 4730);
+
 });
 
-app.on('close', function () {
+/*
+Perform any resource cleanup such as message bus
+handlers and database connections
+*/
+function cleanupResources(){
 
   //unsubscribe the handlers
-  messageBus.unsubscribe(AttendeeRegistered.EVENT, attendeeHandler.handleAttendeeRegistered);
-  messageBus.unsubscribe(AttendeeEmailChanged.EVENT, attendeeHandler.handleAttendeeEmailChanged);
-  messageBus.unsubscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeHandler.handleAttendeeChangeEmailConfirmed);
-  messageBus.unsubscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeHandler.handleAttendeeConfirmChangeEmailFailed);
+  if(messageBus && attendeeHandler){
 
-});
+    messageBus.unsubscribe(AttendeeRegistered.EVENT, attendeeHandler.handleAttendeeRegistered);
+    messageBus.unsubscribe(AttendeeEmailChanged.EVENT, attendeeHandler.handleAttendeeEmailChanged);
+    messageBus.unsubscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeHandler.handleAttendeeChangeEmailConfirmed);
+    messageBus.unsubscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeHandler.handleAttendeeConfirmChangeEmailFailed);
+
+    attendeeHandler = null;
+    messageBus = null;
+  }
+
+  database.close();
+}
+
+/*
+In the event of a CTRL+C or kill command
+close the server gracefully
+*/
+function closeServer(){
+
+  if(server){
+    server.close(function() {
+
+      console.log("Closed out remaining connections.");
+
+      process.exit();
+
+    });
+
+    setTimeout(function() {
+      console.error("Could not close connections in time, forcefully shutting down");
+      process.exit();
+    }, 10*1000);
+  }else{
+    process.exit();
+  }
+
+}
+
+// listen for TERM signal .e.g. kill
+process.on ('SIGTERM', closeServer);
+
+// listen for INT signal e.g. Ctrl-C
+process.on ('SIGINT', closeServer);
+
+// listen for exit
+process.on('exit', cleanupResources);
 
 
 //register an attendee
@@ -78,7 +120,7 @@ app.post('/attendees/register', function(req, res){
 
   var attendee = new Attendee(id).init(firstName, lastName, email);
 
-  var repository = new AttendeeRepository(db);
+  var repository = new AttendeeRepository();
 
   repository.save(attendee, function(err){
 
@@ -104,7 +146,7 @@ app.post('/attendees/:id/changeemail', function(req, res){
   var id = parseInt(req.params.id);
   var email = req.body.email;
 
-  var repository = new AttendeeRepository(db);
+  var repository = new AttendeeRepository();
 
   repository.getById(id, function(err, attendee){
     if(err){
@@ -139,7 +181,7 @@ app.post('/attendees/:id/confirmchangeemail', function(req, res){
   var id = parseInt(req.params.id);
   var confirmationId = req.body.confirmationId;
 
-  var repository = new AttendeeRepository(db);
+  var repository = new AttendeeRepository();
 
   repository.getById(id, function(err, attendee){
     if(err){
@@ -165,10 +207,32 @@ app.get('/attendees/:id', function(req, res){
   res.type('application/json');
 
   var id = parseInt(req.params.id);
-  var dataProvider = new DataProvider(db);
+  var dataProvider = new AttendeeDataProvider();
 
   dataProvider.getAttendee(id, function(err, attendee){
-    res.send(attendee);
+    if(err){
+      res.status(500).send(err.message);
+    }else{
+      res.send(attendee);
+    }
+  });
+
+});
+
+app.get('/attendees', function(req, res){
+
+  res.type('application/json');
+
+  var dataProvider = new AttendeeDataProvider();
+
+  dataProvider.getAttendees(function(err, attendees){
+
+    if(err){
+      res.status(500).send(err.message);
+    }else{
+      res.send(attendees);
+    }
+
   });
 
 });
