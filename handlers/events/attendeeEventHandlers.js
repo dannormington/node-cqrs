@@ -1,5 +1,3 @@
-var AttendeeDataProvider = require('../../infrastructure/attendeeDataProvider.js');
-
 var database = require('../../infrastructure/database.js');
 
 /*
@@ -18,11 +16,8 @@ function AttendeeHandlers(){
 
     console.log("handling " + event.name);
 
-
-    var attendeeDataProvider = new AttendeeDataProvider();
-
     //check to see if the email already exists in the read model
-    attendeeDataProvider.getAttendeeByEmail(event.email, function(err, existingAttendee){
+    this._attendees.findOne({email:event.email}, function(err, existingAttendee){
 
       if(!err){
 
@@ -37,12 +32,12 @@ function AttendeeHandlers(){
           console.log("Attendee email already registered");
 
         }else{
-          
+
           var attendee = {
             attendeeId: event.aggregateId,
             firstName: event.firstName,
             lastName: event.lastName,
-            email: event.email.toLowerCase()
+            email: event.email
           };
 
           this._attendees.insert(attendee, function(err){

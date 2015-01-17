@@ -54,7 +54,7 @@ Attendee.prototype.init = function(firstName, lastName, email){
     return null;
   }
 
-  this.applyChange(new AttendeeRegistered(this.getId(), firstName, lastName, email));
+  this.applyChange(new AttendeeRegistered(this.getId(), firstName.trim(), lastName.trim(), email.trim().toLowerCase()));
 
   return this;
 };
@@ -63,7 +63,7 @@ Attendee.prototype.changeEmail = function(email){
 
   //validate the email exists
   if(email && email.trim().length > 0){
-    this.applyChange(new AttendeeEmailChanged(uuid.v4(), this.getId(), email));
+    this.applyChange(new AttendeeEmailChanged(uuid.v4(), this.getId(), email.trim().toLowerCase()));
   }
 
 };
