@@ -8,6 +8,10 @@ function Repository(){
   this._eventStore = new EventStore();
 }
 
+/*
+Persist the aggregate's uncommitted
+changes to the event store
+*/
 Repository.prototype.save = function(aggregateRoot, callback){
 
   var id = aggregateRoot.getId();

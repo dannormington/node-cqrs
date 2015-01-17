@@ -13,6 +13,9 @@ function AttendeeRepository(){
   Repository.call(this);
 }
 
+/*
+Get an attendee by Id
+*/
 AttendeeRepository.prototype.getById = function(attendeeId, callback){
 
   this._eventStore.getEvents(attendeeId, function(err, events){

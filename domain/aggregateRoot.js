@@ -13,10 +13,16 @@ function AggregateRoot(id){
   this._eventEmitter = new EventEmitter();
 }
 
+/*
+Get the aggregate's Id
+*/
 AggregateRoot.prototype.getId = function(){
   return this._id;
 };
 
+/*
+Hydrate the aggregates state
+*/
 AggregateRoot.prototype.loadFromHistory = function(events){
   if(events){
     events.forEach(function(event){
@@ -30,19 +36,33 @@ AggregateRoot.prototype.loadFromHistory = function(events){
   }
 };
 
+/*
+Get a list of all the state changes
+*/
 AggregateRoot.prototype.getUncommittedChanges = function(){
   return this._uncommittedChanges;
 };
 
+/*
+Get the aggregate's current version
+*/
 AggregateRoot.prototype.getVersion = function(){
   return this._version;
 };
 
+/*
+Apply the event's state changes and add it to
+the list of uncommitted changes.
+*/
 AggregateRoot.prototype.applyChange = function(event){
   this._uncommittedChanges.push(event);
   this._eventEmitter.emit(event.name, event);
 };
 
+/*
+Clear the list of uncommitted changes and update
+the aggregate's current version
+*/
 AggregateRoot.prototype.markChangesAsCommitted = function(){
 
   if(this._uncommittedChanges){
@@ -58,6 +78,11 @@ AggregateRoot.prototype.markChangesAsCommitted = function(){
   }
 };
 
+/*
+The purpose of this method is to allow classes that
+inherit from AggregateRoot to handle state changes
+based upon specific events.
+*/
 AggregateRoot.prototype.onEvent = function(name, listener) {
 	return this._eventEmitter.on(name, listener);
 };

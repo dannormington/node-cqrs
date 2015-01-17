@@ -1,10 +1,12 @@
-var database = require('./database.js');
+var AttendeeDataProvider = require('../../infrastructure/attendeeDataProvider.js');
+
+var database = require('../../infrastructure/database.js');
 
 /*
 The  purpose of this module is to handle
 attendee based events by populating the read models
 */
-function AttendeeHandler(){
+function AttendeeHandlers(){
 
   this._attendees = database.getCollection("attendee");
 
@@ -16,20 +18,43 @@ function AttendeeHandler(){
 
     console.log("handling " + event.name);
 
-    var attendee = {
-      attendeeId: event.aggregateId,
-      firstName: event.firstName,
-      lastName: event.lastName,
-      email: event.email
-    };
 
-    this._attendees.insert(attendee, function(err){
-      if(err){
-        //log the error. For now just log to the console
-        console.log(err);
+    var attendeeDataProvider = new AttendeeDataProvider();
+
+    //check to see if the email already exists in the read model
+    attendeeDataProvider.getAttendeeByEmail(event.email, function(err, existingAttendee){
+
+      if(!err){
+
+        if(existingAttendee){
+
+          /*
+          Due to a race condition the attendee already exists.
+          Best solution may be to send an email to the attendee
+          informing them of what happened along with a possible
+          solution.
+          */
+          console.log("Attendee email already registered");
+
+        }else{
+          
+          var attendee = {
+            attendeeId: event.aggregateId,
+            firstName: event.firstName,
+            lastName: event.lastName,
+            email: event.email.toLowerCase()
+          };
+
+          this._attendees.insert(attendee, function(err){
+            if(err){
+              //log the error. For now just log to the console
+              console.log(err);
+            }
+          });
+        }
       }
-    });
 
+    }.bind(this));
   }.bind(this);
 
   /*
@@ -45,10 +70,8 @@ function AttendeeHandler(){
   };
 
   /*
-  handle the change email confirmed event.
-  This event is published once the user has confirmed their
-  email address. Once confirmed, the attendee read model's
-  email is updated
+  handle the change email confirmed event by updaing
+  the attendee's email in the read model
   */
   this.handleAttendeeChangeEmailConfirmed = function(event){
     console.log("handling " + event.name);
@@ -59,7 +82,7 @@ function AttendeeHandler(){
         console.log(err);
       }else{
         if(attendee){
-          attendee.email = event.email;
+          attendee.email = event.email.toLowerCase();
 
           this._attendees.update({attendeeId:event.aggregateId}, attendee, function(err){
             if(err){
@@ -86,4 +109,4 @@ function AttendeeHandler(){
 
 }
 
-module.exports = AttendeeHandler;
+module.exports = new AttendeeHandlers();

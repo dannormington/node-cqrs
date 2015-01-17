@@ -26,6 +26,31 @@ AttendeeDataProvider.prototype.getAttendee = function(attendeeId, callback){
   });
 };
 
+/*
+Get a single attendee by email
+*/
+AttendeeDataProvider.prototype.getAttendeeByEmail = function(email, callback){
+
+  if(!email){
+    callback(null, null);
+    return;
+  }
+
+  //get a single attendee and don't return the _id field from the document
+  this._attendees.findOne({email:email.trim().toLowerCase()},{_id:0}, function(err, attendee){
+
+    if(err){
+      callback(err,null);
+    }else{
+      callback(null, attendee);
+    }
+
+  });
+};
+
+/*
+Get a list of all attendees
+*/
 AttendeeDataProvider.prototype.getAttendees = function(callback){
 
   //get all attendees and don't return the _id field from the document

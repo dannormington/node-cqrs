@@ -11,6 +11,9 @@ function EventStore(){
 
 }
 
+/*
+Persist the events to the event store for the aggregate specified
+*/
 EventStore.prototype.saveEvents = function(aggregateId, version, events, callback){
 
   //no need to process if there aren't any events
@@ -96,6 +99,9 @@ EventStore.prototype.saveEvents = function(aggregateId, version, events, callbac
   }.bind(this));
 };
 
+/*
+Get all of the events for a specific aggregate
+*/
 EventStore.prototype.getEvents = function(aggregateId, callback){
 
   this._eventStore.findOne({aggregateId: aggregateId}, function(err, aggregate){

@@ -13,6 +13,10 @@ function MessageBus(){
   this._emitter = new EventEmitter();
 }
 
+/*
+Publish the events to all
+listeners who are subscribers
+*/
 MessageBus.prototype.publish = function(events){
 
   if(events && events.length > 0){
@@ -28,6 +32,9 @@ MessageBus.prototype.publish = function(events){
   }
 };
 
+/*
+Subscribe the listener to a specific event
+*/
 MessageBus.prototype.subscribe = function(eventName, listener){
 
   console.log("subscribing to event " + eventName);
@@ -35,6 +42,9 @@ MessageBus.prototype.subscribe = function(eventName, listener){
   this._emitter.on(eventName, listener);
 };
 
+/*
+Unsubscribe the listener from a specific event
+*/
 MessageBus.prototype.unsubscribe = function(eventName, listener){
 
   console.log("unsubscribing event " + eventName);

@@ -8,18 +8,16 @@ var AttendeeChangeEmailConfirmed = require('./domain/events/attendeeChangeEmailC
 var AttendeeConfirmChangeEmailFailed = require('./domain/events/attendeeConfirmChangeEmailFailed.js');
 
 var AttendeeDataProvider = require('./infrastructure/attendeeDataProvider.js');
-var AttendeeRepository = require('./infrastructure/attendeeRepository.js');
-var Attendee = require('./domain/attendee.js');
 
 var messageBus = require('./infrastructure/messageBus.js');
 var database = require('./infrastructure/database.js');
+var attendeeEventHandlers;
+var attendeeCommandHandlers;
+var server;
 
 var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-var attendeeHandler;
-var server;
 
 database.connect(function(err){
 
@@ -27,19 +25,16 @@ database.connect(function(err){
     throw err;
   }
 
-  var AttendeeHandler = require('./infrastructure/attendeeHandler.js');
-
-  //create an instance of the event handler
-  attendeeHandler = new AttendeeHandler();
+  attendeeCommandHandlers = require('./handlers/commands/attendeeCommandHandlers.js');
+  attendeeEventHandlers = require('./handlers/events/attendeeEventHandlers.js');
 
   //subscribe the handlers to the domain events
-  messageBus.subscribe(AttendeeRegistered.EVENT, attendeeHandler.handleAttendeeRegistered);
-  messageBus.subscribe(AttendeeEmailChanged.EVENT, attendeeHandler.handleAttendeeEmailChanged);
-  messageBus.subscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeHandler.handleAttendeeChangeEmailConfirmed);
-  messageBus.subscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeHandler.handleAttendeeConfirmChangeEmailFailed);
+  messageBus.subscribe(AttendeeRegistered.EVENT, attendeeEventHandlers.handleAttendeeRegistered);
+  messageBus.subscribe(AttendeeEmailChanged.EVENT, attendeeEventHandlers.handleAttendeeEmailChanged);
+  messageBus.subscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeEventHandlers.handleAttendeeChangeEmailConfirmed);
+  messageBus.subscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeEventHandlers.handleAttendeeConfirmChangeEmailFailed);
 
   server = app.listen(process.env.PORT || 4730);
-
 });
 
 /*
@@ -49,14 +44,14 @@ handlers and database connections
 function cleanupResources(){
 
   //unsubscribe the handlers
-  if(messageBus && attendeeHandler){
+  if(messageBus && attendeeEventHandlers){
 
-    messageBus.unsubscribe(AttendeeRegistered.EVENT, attendeeHandler.handleAttendeeRegistered);
-    messageBus.unsubscribe(AttendeeEmailChanged.EVENT, attendeeHandler.handleAttendeeEmailChanged);
-    messageBus.unsubscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeHandler.handleAttendeeChangeEmailConfirmed);
-    messageBus.unsubscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeHandler.handleAttendeeConfirmChangeEmailFailed);
+    messageBus.unsubscribe(AttendeeRegistered.EVENT, attendeeEventHandlers.handleAttendeeRegistered);
+    messageBus.unsubscribe(AttendeeEmailChanged.EVENT, attendeeEventHandlers.handleAttendeeEmailChanged);
+    messageBus.unsubscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeEventHandlers.handleAttendeeChangeEmailConfirmed);
+    messageBus.unsubscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeEventHandlers.handleAttendeeConfirmChangeEmailFailed);
 
-    attendeeHandler = null;
+    attendeeEventHandlers = null;
     messageBus = null;
   }
 
@@ -103,33 +98,14 @@ app.post('/attendees/register', function(req, res){
 
   res.type('text/plain');
 
-  //validate the command
-  if(!req.body.firstName || !req.body.lastName || !req.body.email || !req.body.id ||
-    req.body.firstName.trim().length === 0 ||
-    req.body.lastName.trim().length === 0 ||
-    req.body.email.trim().length === 0){
-
-      res.status(400).send('invalid parameters');
-      return;
-  }
-
-  var id = req.body.id;
-  var email = req.body.email;
-  var lastName = req.body.lastName;
-  var firstName = req.body.firstName;
-
-  var attendee = new Attendee(id).init(firstName, lastName, email);
-
-  var repository = new AttendeeRepository();
-
-  repository.save(attendee, function(err){
-
+  attendeeCommandHandlers.handleRegisterAttendee(req.body, function(err, exception){
     if(err){
-      res.status(500).send(err.message);
+      res.status(exception ? 500 : 400).send(err.message);
     }else{
       res.send('Attendee Registered');
     }
   });
+
 });
 
 //change the attendee's email
@@ -137,31 +113,14 @@ app.post('/attendees/:id/changeemail', function(req, res){
 
   res.type('text/plain');
 
-  //validate the command
-  if(!req.body.email || req.body.email.trim().length === 0){
-    res.status(400).send('invalid parameters');
-    return;
-  }
+  var command = req.body;
+  command.id = req.params.id;
 
-  var id = parseInt(req.params.id);
-  var email = req.body.email;
-
-  var repository = new AttendeeRepository();
-
-  repository.getById(id, function(err, attendee){
+  attendeeCommandHandlers.handleChangeEmail(command, function(err, exception){
     if(err){
-      res.status(500).send(err.message);
+      res.status(exception ? 500 : 400).send(err.message);
     }else{
-
-      attendee.changeEmail(email);
-
-      repository.save(attendee, function(err){
-        if(err){
-          res.status(500).send(err.message);
-        }else{
-          res.send('email changed.');
-        }
-      });
+      res.send('Email Changed.');
     }
   });
 
@@ -172,31 +131,14 @@ app.post('/attendees/:id/confirmchangeemail', function(req, res){
 
   res.type('text/plain');
 
-  //validate the command
-  if(!req.body.confirmationId || req.body.confirmationId.trim().length === 0){
-    res.status(400).send('invalid parameters');
-    return;
-  }
+  var command = req.body;
+  command.id = req.params.id;
 
-  var id = parseInt(req.params.id);
-  var confirmationId = req.body.confirmationId;
-
-  var repository = new AttendeeRepository();
-
-  repository.getById(id, function(err, attendee){
+  attendeeCommandHandlers.handleConfirmChangeEmail(command, function(err, exception){
     if(err){
-      res.status(500).send(err.message);
+      res.status(exception ? 500 : 400).send(err.message);
     }else{
-
-      attendee.confirmChangeEmail(confirmationId);
-
-      repository.save(attendee, function(err){
-        if(err){
-          res.status(500).send(err.message);
-        }else{
-          res.send('email change confirmed.');
-        }
-      });
+      res.send('Email Change Confirmed.');
     }
   });
 
@@ -234,5 +176,6 @@ app.get('/attendees', function(req, res){
     }
 
   });
+
 
 });
