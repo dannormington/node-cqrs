@@ -7,7 +7,7 @@ This implementation is inspired by Greg Young's Simple CQRS C# example
 located at https://github.com/gregoryyoung/m-r
 
 
-Note
+Why?
 ----
 The purpose of the repo was to learn some node while applying patterns I enjoy working with. I'm sure there are several areas that experienced node developers would choose to implement differently. I welcome comments and suggestions.
 
