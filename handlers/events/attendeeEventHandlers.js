@@ -19,7 +19,15 @@ function AttendeeHandlers(){
     //check to see if the email already exists in the read model
     this._attendees.findOne({email:event.email}, function(err, existingAttendee){
 
-      if(!err){
+      if(err){
+
+        /*
+        In production environment you may want to log this error and/or
+        contact IT staff through email to notify them of the issue
+        */
+
+        console.log(err);
+      } else {
 
         if(existingAttendee){
 
@@ -42,7 +50,11 @@ function AttendeeHandlers(){
 
           this._attendees.insert(attendee, function(err){
             if(err){
-              //log the error. For now just log to the console
+              /*
+              In production environment you may want to log this error and/or
+              contact IT staff through email to notify them of the issue
+              */
+
               console.log(err);
             }
           });
@@ -69,11 +81,17 @@ function AttendeeHandlers(){
   the attendee's email in the read model
   */
   this.handleAttendeeChangeEmailConfirmed = function(event){
+
     console.log("handling " + event.name);
 
     this._attendees.findOne({attendeeId:event.aggregateId}, function(err, attendee){
       if(err){
-        //log the error
+
+        /*
+        In production environment you may want to log this error and/or
+        contact IT staff through email to notify them of the issue
+        */
+
         console.log(err);
       }else{
         if(attendee){
@@ -81,10 +99,23 @@ function AttendeeHandlers(){
 
           this._attendees.update({attendeeId:event.aggregateId}, attendee, function(err){
             if(err){
-              //log the error. For now just log to the console
+              /*
+              In production environment you may want to log this error and/or
+              contact IT staff through email to notify them of the issue
+              */
+
               console.log(err);
             }
           });
+        }else{
+          /*
+          attendee wasn't found. This shouldn't happen. As with other
+          situations when handling events where a problem occurs it might
+          be best to log the issue and contact IT staff through email to notify
+          them of the issue.
+          */
+          console.log("Attendee not found. Cannot update email.");
+
         }
       }
     }.bind(this));

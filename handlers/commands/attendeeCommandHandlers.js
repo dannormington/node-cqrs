@@ -4,7 +4,9 @@ var Attendee = require('../../domain/attendee.js');
 
 function AttendeeCommandHandlers(){
 
-  //handles the registration of an attendee
+  /*
+  handles the registration of an attendee
+  */
   this.handleRegisterAttendee = function(command, callback){
 
     //validate the command
@@ -25,7 +27,6 @@ function AttendeeCommandHandlers(){
 
       if(err){
         callback(err, true);
-        return;
       }else{
 
         if(existingAttendee){
@@ -65,7 +66,6 @@ function AttendeeCommandHandlers(){
 
       if(err){
         callback(err, true);
-        return;
       }else{
 
         if(existingAttendee){
@@ -96,8 +96,6 @@ function AttendeeCommandHandlers(){
         }
       }
     });
-
-
   };
 
   //Handle confirming an email change
