@@ -1,6 +1,6 @@
 var AttendeeDataProvider = require('../../infrastructure/attendeeDataProvider.js');
-var AttendeeRepository = require('../../infrastructure/attendeeRepository.js');
 var Attendee = require('../../domain/attendee.js');
+var Repository = require('../../infrastructure/repository.js');
 
 function AttendeeCommandHandlers(){
 
@@ -35,7 +35,7 @@ function AttendeeCommandHandlers(){
 
           var attendee = new Attendee(command.id).init(command.firstName, command.lastName, command.email);
 
-          var repository = new AttendeeRepository();
+          var repository = new Repository(Attendee);
 
           repository.save(attendee, function(err){
 
@@ -75,7 +75,7 @@ function AttendeeCommandHandlers(){
           var id = parseInt(command.id);
           var email = command.email.trim();
 
-          var repository = new AttendeeRepository();
+          var repository = new Repository(Attendee);
 
           repository.getById(id, function(err, attendee){
             if(err){
@@ -110,7 +110,7 @@ function AttendeeCommandHandlers(){
     var id = parseInt(command.id);
     var confirmationId = command.confirmationId;
 
-    var repository = new AttendeeRepository();
+    var repository = new Repository(Attendee);
 
     repository.getById(id, function(err, attendee){
       if(err){

@@ -2,10 +2,17 @@ var EventStore = require('./eventStore.js');
 
 /*
 The purpose of this module is to provide
-base repository functionality.
+basic repository functionality.
 */
-function Repository(){
+function Repository(aggregateType){
+  
   this._eventStore = new EventStore();
+
+  /*
+  Assign the type of the aggregate. It is expected that the
+  type passed has a constructor function that expects an Id
+  */
+  this._aggregateType = aggregateType;
 }
 
 /*
@@ -26,6 +33,30 @@ Repository.prototype.save = function(aggregateRoot, callback){
 
     callback(err, result);
   });
+
+};
+
+/*
+Get an aggregate by Id
+*/
+Repository.prototype.getById = function(aggregateId, callback){
+
+  this._eventStore.getEvents(aggregateId, function(err, events){
+
+    if(err){
+      callback(err, null);
+    }else{
+
+      if(events){
+        var aggregate = new this._aggregateType(aggregateId);
+        aggregate.loadFromHistory(events);
+        callback(null, aggregate);
+      }else{
+        callback(new Error('No events for aggregate.', null));
+      }
+    }
+
+  }.bind(this));
 
 };
 
