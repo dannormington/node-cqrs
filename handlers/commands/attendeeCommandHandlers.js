@@ -42,7 +42,7 @@ function AttendeeCommandHandlers(){
             if(err){
               callback(err, true);
             }else{
-              callback(null);
+              callback(null, false);
             }
           });
         }
@@ -88,7 +88,7 @@ function AttendeeCommandHandlers(){
                 if(err){
                   callback(err, true);
                 }else{
-                  callback(null);
+                  callback(null, false);
                 }
               });
             }
@@ -123,7 +123,7 @@ function AttendeeCommandHandlers(){
           if(err){
             callback(err, true);
           }else{
-            callback(null);
+            callback(null, false);
           }
         });
       }

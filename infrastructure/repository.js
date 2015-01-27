@@ -5,7 +5,7 @@ The purpose of this module is to provide
 basic repository functionality.
 */
 function Repository(aggregateType){
-  
+
   this._eventStore = new EventStore();
 
   /*
@@ -40,6 +40,15 @@ Repository.prototype.save = function(aggregateRoot, callback){
 Get an aggregate by Id
 */
 Repository.prototype.getById = function(aggregateId, callback){
+
+  /*
+  if the aggregate root type wasn't supplied simply return null
+  to the callback
+  */
+  if(!this._aggregateType){
+    callback(null, null);
+    return;
+  }
 
   this._eventStore.getEvents(aggregateId, function(err, events){
 

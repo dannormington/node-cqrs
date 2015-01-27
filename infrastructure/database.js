@@ -22,7 +22,8 @@ Database.prototype.connect = function(callback){
     console.log("connected to mongodb");
 
     this._database = database;
-    callback();
+    callback(null);
+    
   }.bind(this));
 
 };
