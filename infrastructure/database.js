@@ -23,7 +23,7 @@ Database.prototype.connect = function(callback){
 
     this._database = database;
     callback(null);
-    
+
   }.bind(this));
 
 };

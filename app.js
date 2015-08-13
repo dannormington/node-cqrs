@@ -1,18 +1,15 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 
-//define the events to subsribe to
-var AttendeeRegistered = require('./domain/events/attendeeRegistered.js');
-var AttendeeEmailChanged = require('./domain/events/attendeeEmailChanged.js');
-var AttendeeChangeEmailConfirmed = require('./domain/events/attendeeChangeEmailConfirmed.js');
-var AttendeeConfirmChangeEmailFailed = require('./domain/events/attendeeConfirmChangeEmailFailed.js');
+//Get command classes
+var RegisterAttendee = require('./commands/registerAttendee.js');
+var ChangeEmail = require('./commands/changeEmail.js');
+var ConfirmChangeEmail = require('./commands/confirmChangeEmail.js');
 
 var AttendeeDataProvider = require('./infrastructure/attendeeDataProvider.js');
 
 var messageBus = require('./infrastructure/messageBus.js');
 var database = require('./infrastructure/database.js');
-var attendeeEventHandlers;
-var attendeeCommandHandlers;
 var server;
 
 var app = express();
@@ -25,14 +22,10 @@ database.connect(function(err){
     throw err;
   }
 
-  attendeeCommandHandlers = require('./handlers/commands/attendeeCommandHandlers.js');
-  attendeeEventHandlers = require('./handlers/events/attendeeEventHandlers.js');
-
-  //subscribe the handlers to the domain events
-  messageBus.subscribe(AttendeeRegistered.EVENT, attendeeEventHandlers.handleAttendeeRegistered);
-  messageBus.subscribe(AttendeeEmailChanged.EVENT, attendeeEventHandlers.handleAttendeeEmailChanged);
-  messageBus.subscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeEventHandlers.handleAttendeeChangeEmailConfirmed);
-  messageBus.subscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeEventHandlers.handleAttendeeConfirmChangeEmailFailed);
+  //Wait to register the command/event handlers once a database
+  //connection has been established
+  require('./handlers/attendeeCommandHandlers.js');
+  require('./handlers/attendeeEventHandlers.js');
 
   server = app.listen(process.env.PORT || 4730);
 });
@@ -44,14 +37,8 @@ handlers and database connections
 function cleanupResources(){
 
   //unsubscribe the handlers
-  if(messageBus && attendeeEventHandlers){
-
-    messageBus.unsubscribe(AttendeeRegistered.EVENT, attendeeEventHandlers.handleAttendeeRegistered);
-    messageBus.unsubscribe(AttendeeEmailChanged.EVENT, attendeeEventHandlers.handleAttendeeEmailChanged);
-    messageBus.unsubscribe(AttendeeChangeEmailConfirmed.EVENT, attendeeEventHandlers.handleAttendeeChangeEmailConfirmed);
-    messageBus.unsubscribe(AttendeeConfirmChangeEmailFailed.EVENT, attendeeEventHandlers.handleAttendeeConfirmChangeEmailFailed);
-
-    attendeeEventHandlers = null;
+  if(messageBus){
+    messageBus.unsubscribeAll();
     messageBus = null;
   }
 
@@ -98,7 +85,7 @@ app.post('/attendees/register', function(req, res){
 
   res.type('text/plain');
 
-  attendeeCommandHandlers.handleRegisterAttendee(req.body, function(err, exception){
+  messageBus.send(RegisterAttendee.COMMAND, req.body, function(err, exception){
     if(err){
       res.status(exception ? 500 : 400).send(err.message);
     }else{
@@ -116,7 +103,7 @@ app.post('/attendees/:id/changeemail', function(req, res){
   var command = req.body;
   command.id = req.params.id;
 
-  attendeeCommandHandlers.handleChangeEmail(command, function(err, exception){
+  messageBus.send(ChangeEmail.COMMAND, command, function(err, exception){
     if(err){
       res.status(exception ? 500 : 400).send(err.message);
     }else{
@@ -134,7 +121,7 @@ app.post('/attendees/:id/confirmchangeemail', function(req, res){
   var command = req.body;
   command.id = req.params.id;
 
-  attendeeCommandHandlers.handleConfirmChangeEmail(command, function(err, exception){
+  messageBus.send(ConfirmChangeEmail.COMMAND, command, function(err, exception){
     if(err){
       res.status(exception ? 500 : 400).send(err.message);
     }else{

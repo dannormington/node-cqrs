@@ -37,7 +37,7 @@ Subscribe the listener to a specific event
 */
 MessageBus.prototype.subscribe = function(eventName, listener){
 
-  console.log("subscribing to event " + eventName);
+  console.log("subscribing to " + eventName);
 
   this._emitter.on(eventName, listener);
 };
@@ -47,9 +47,30 @@ Unsubscribe the listener from a specific event
 */
 MessageBus.prototype.unsubscribe = function(eventName, listener){
 
-  console.log("unsubscribing event " + eventName);
+  console.log("unsubscribing from " + eventName);
 
   this._emitter.removeListener(eventName, listener);
+};
+
+/*
+Send the command to the command handler
+*/
+MessageBus.prototype.send = function(commandName, command, callback){
+
+  console.log("sending command " + commandName);
+
+  this._emitter.emit(commandName, command, function(err, exception){
+    callback(err, exception);
+  });
+};
+
+/*
+Unregister and unsubscribe all commands and events
+*/
+MessageBus.prototype.unsubscribeAll = function(){
+
+  this._emitter.removeAllListeners();
+
 };
 
 module.exports = new MessageBus();
