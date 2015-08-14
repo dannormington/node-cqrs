@@ -1,5 +1,5 @@
-var messageBus = require('./messageBus.js');
-var database = require('./database.js');
+var messageBus = require('./messageBus.js').Instance;
+var database = require('./database.js').Instance;
 
 /*
 the purpose of this module is to manage

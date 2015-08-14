@@ -8,8 +8,8 @@ var ConfirmChangeEmail = require('./commands/confirmChangeEmail.js');
 
 var AttendeeDataProvider = require('./infrastructure/attendeeDataProvider.js');
 
-var messageBus = require('./infrastructure/messageBus.js');
-var database = require('./infrastructure/database.js');
+var messageBus = require('./infrastructure/messageBus.js').Instance;
+var database = require('./infrastructure/database.js').Instance;
 var server;
 
 var app = express();

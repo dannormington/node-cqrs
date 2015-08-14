@@ -1,4 +1,4 @@
-var database = require('./database.js');
+var database = require('./database.js').Instance;
 
 /*
 The purpose of this module is to provide

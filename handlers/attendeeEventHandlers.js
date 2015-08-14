@@ -1,4 +1,4 @@
-var database = require('../infrastructure/database.js');
+var database = require('../infrastructure/database.js').Instance;
 var util = require("util");
 
 var AttendeeRegistered = require('../domain/events/attendeeRegistered.js');

@@ -1,4 +1,4 @@
-var MongoClient = require('mongodb').MongoClient;
+var mongoClient = require('mongodb').MongoClient;
 
 /*
 The purpose of this module is to act
@@ -13,7 +13,7 @@ Connect to the database
 */
 Database.prototype.connect = function(callback){
 
-  MongoClient.connect("mongodb://localhost:27017/nodeSimpleCQRSExample", function(err, database) {
+  mongoClient.connect("mongodb://localhost:27017/nodeSimpleCQRSExample", function(err, database) {
     if(err){
       callback(err);
       return;
@@ -44,4 +44,5 @@ Database.prototype.getCollection = function(collectionName){
   return this._database.collection(collectionName);
 };
 
-module.exports = new Database();
+module.exports = Database;
+module.exports.Instance = new Database();

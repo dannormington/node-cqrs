@@ -1,4 +1,4 @@
-var messageBus = require('../infrastructure/messageBus.js');
+var messageBus = require('../infrastructure/messageBus.js').Instance;
 
 /*
 Base class for handlers

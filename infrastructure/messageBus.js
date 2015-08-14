@@ -73,4 +73,5 @@ MessageBus.prototype.unsubscribeAll = function(){
 
 };
 
-module.exports = new MessageBus();
+module.exports = MessageBus;
+module.exports.Instance = new MessageBus();
