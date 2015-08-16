@@ -33,15 +33,12 @@ function handleConfirmChangeEmail(command, callback){
     return;
   }
 
-  var id = parseInt(command.id);
-  var confirmationId = command.confirmationId;
-
-  repository.getById(id, function(err, attendee){
+  repository.getById(command.id, function(err, attendee){
     if(err){
       callback(err, true);
     }else{
 
-      attendee.confirmChangeEmail(confirmationId);
+      attendee.confirmChangeEmail(command.confirmationId);
 
       repository.save(attendee, function(err){
         if(err){
@@ -74,15 +71,12 @@ function handleChangeEmail(command, callback){
         callback(new Error('email already exists.'), false);
       }else{
 
-        var id = parseInt(command.id);
-        var email = command.email.trim();
-
-        repository.getById(id, function(err, attendee){
+        repository.getById(command.id, function(err, attendee){
           if(err){
             callback(err, true);
           }else{
 
-            attendee.changeEmail(email);
+            attendee.changeEmail(command.email);
 
             repository.save(attendee, function(err){
               if(err){
@@ -104,7 +98,8 @@ function handleRegisterAttendee(command, callback){
   if(!command || !command.firstName || !command.lastName || !command.email || !command.id ||
     command.firstName.trim().length === 0 ||
     command.lastName.trim().length === 0 ||
-    command.email.trim().length === 0){
+    command.email.trim().length === 0 ||
+    command.id.toString().trim().length === 0){
 
     callback(new Error('invalid parameters'),false);
 

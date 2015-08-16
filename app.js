@@ -135,10 +135,9 @@ app.get('/attendees/:id', function(req, res){
 
   res.type('application/json');
 
-  var id = parseInt(req.params.id);
   var dataProvider = new AttendeeDataProvider();
 
-  dataProvider.getAttendee(id, function(err, attendee){
+  dataProvider.getAttendee(req.params.id, function(err, attendee){
     if(err){
       res.status(500).send(err.message);
     }else{

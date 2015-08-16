@@ -7,7 +7,12 @@ to load an aggregate from an event stream and
 help manage state changes.
 */
 function AggregateRoot(id){
-  this._id = id;
+
+  if(!id){
+    throw new Error('id is required.');
+  }
+
+  this._id = id.toString().trim();
   this._version = 0;
   this._uncommittedChanges = [];
   this._eventEmitter = new EventEmitter();

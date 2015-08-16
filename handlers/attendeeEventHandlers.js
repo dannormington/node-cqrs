@@ -1,6 +1,6 @@
-var database = require('../infrastructure/database.js').Instance;
 var util = require("util");
 
+var AttendeeDataProvider = require('../infrastructure/attendeeDataProvider.js');
 var AttendeeRegistered = require('../domain/events/attendeeRegistered.js');
 var AttendeeEmailChanged = require('../domain/events/attendeeEmailChanged.js');
 var AttendeeChangeEmailConfirmed = require('../domain/events/attendeeChangeEmailConfirmed.js');
@@ -11,7 +11,7 @@ var Handler = require('./handler.js');
 util.inherits(AttendeeEventHandlers, Handler);
 
 //declare at the module level since the class is a singleton
-var attendees = database.getCollection("attendee");
+var attendeeDataProvider = new AttendeeDataProvider();
 
 /*
 The  purpose of this module is to handle
@@ -46,7 +46,7 @@ function handleAttendeeChangeEmailConfirmed(event){
 
   console.log("handling " + event.name);
 
-  attendees.findOne({attendeeId:event.aggregateId}, function(err, attendee){
+  attendeeDataProvider.getAttendee(event.aggregateId, function(err, attendee){
     if(err){
 
       /*
@@ -57,9 +57,10 @@ function handleAttendeeChangeEmailConfirmed(event){
       console.log(err);
     }else{
       if(attendee){
-        attendee.email = event.email.toLowerCase();
 
-        attendees.update({attendeeId:event.aggregateId}, attendee, function(err){
+        attendee.email = event.email;
+
+        attendeeDataProvider.updateAttendee(attendee, function(err){
           if(err){
             /*
             In production environment you may want to log this error and/or
@@ -104,7 +105,7 @@ function handleAttendeeRegistered(event){
     console.log("handling " + event.name);
 
     //check to see if the email already exists in the read model
-    attendees.findOne({email:event.email}, function(err, existingAttendee){
+    attendeeDataProvider.getAttendeeByEmail(event.email, function(err, existingAttendee){
 
       if(err){
 
@@ -135,7 +136,7 @@ function handleAttendeeRegistered(event){
             email: event.email
           };
 
-          attendees.insert(attendee, function(err){
+          attendeeDataProvider.insertAttendee(attendee, function(err){
             if(err){
               /*
               In production environment you may want to log this error and/or
