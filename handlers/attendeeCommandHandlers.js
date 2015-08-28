@@ -28,7 +28,7 @@ function AttendeeCommandHandlers(){
 function handleConfirmChangeEmail(command, callback){
 
   //validate the command
-  if(!command.confirmationId || command.confirmationId.trim().length === 0){
+  if(!command || !command.confirmationId || command.confirmationId.trim().length === 0){
     callback(new Error('invalid parameters'), false);
     return;
   }
@@ -55,7 +55,7 @@ function handleConfirmChangeEmail(command, callback){
 function handleChangeEmail(command, callback){
 
   //validate the command
-  if(!command.email || command.email.trim().length === 0){
+  if(!command || !command.email || command.email.trim().length === 0){
     callback(new Error('invalid parameters'), false);
     return;
   }

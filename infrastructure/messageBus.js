@@ -59,9 +59,7 @@ MessageBus.prototype.send = function(commandName, command, callback){
 
   console.log("sending command " + commandName);
 
-  this._emitter.emit(commandName, command, function(err, exception){
-    callback(err, exception);
-  });
+  this._emitter.emit(commandName, command, callback);
 };
 
 /*
