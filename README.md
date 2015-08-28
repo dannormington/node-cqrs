@@ -1,4 +1,4 @@
-Node CQRS
+Node CQRS with Event Sourcing
 ==============
 
 CQRS pattern implemented using node. The example code includes both a base set of classes as well as a sample domain model, events, and set of endpoints to interact.
