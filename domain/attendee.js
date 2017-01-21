@@ -2,7 +2,6 @@ var AggregateRoot = require('./aggregateRoot.js');
 var AttendeeRegistered = require('./events/attendeeRegistered.js');
 var AttendeeEmailChanged = require('./events/attendeeEmailChanged.js');
 var AttendeeChangeEmailConfirmed = require('./events/attendeeChangeEmailConfirmed.js');
-var AttendeeConfirmChangeEmailFailed = require('./events/attendeeConfirmChangeEmailFailed.js');
 
 var util = require("util");
 var uuid = require("uuid/v4");
@@ -29,19 +28,25 @@ function Attendee(id){
   */
   this._email = null;
 
+  /*
+  represents the unconfirmed email address that the user
+  made a request to change to
+  */
+  this._unconfirmedEmail = null;
+
   this.onEvent(AttendeeRegistered.EVENT, function(event) {
     this._email = event.email;
   }.bind(this));
 
   this.onEvent(AttendeeEmailChanged.EVENT, function(event) {
-    //assign the confirmation Id and email
     this._confirmationId = event.confirmationId;
-    this._email = event.email;
+    this._unconfirmedEmail = event.email;
   }.bind(this));
 
-  this.onEvent(AttendeeChangeEmailConfirmed.EVENT, function(/*event*/) {
-    //reset the Id and email to null since the confirmation has occurred
+  this.onEvent(AttendeeChangeEmailConfirmed.EVENT, function(event) {
+    this._email = event.email;
     this._confirmationId = null;
+    this._unconfirmedEmail = null;
   }.bind(this));
 
 }
@@ -72,10 +77,9 @@ Attendee.prototype.changeEmail = function(email){
 
 Attendee.prototype.confirmChangeEmail = function(confirmationId){
 
+  //validate that the confirmation Ids match
   if(confirmationId === this._confirmationId){
-    this.applyChange(new AttendeeChangeEmailConfirmed(this.getId(), confirmationId, this._email));
-  }else{
-    this.applyChange(new AttendeeConfirmChangeEmailFailed(this.getId(), confirmationId));
+    this.applyChange(new AttendeeChangeEmailConfirmed(this.getId(), confirmationId, this._unconfirmedEmail));
   }
 
 };

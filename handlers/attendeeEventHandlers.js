@@ -4,7 +4,6 @@ var AttendeeDataProvider = require('../infrastructure/attendeeDataProvider.js');
 var AttendeeRegistered = require('../domain/events/attendeeRegistered.js');
 var AttendeeEmailChanged = require('../domain/events/attendeeEmailChanged.js');
 var AttendeeChangeEmailConfirmed = require('../domain/events/attendeeChangeEmailConfirmed.js');
-var AttendeeConfirmChangeEmailFailed = require('../domain/events/attendeeConfirmChangeEmailFailed.js');
 
 var Handler = require('./handler.js');
 
@@ -22,20 +21,7 @@ function AttendeeEventHandlers(){
   this.onMessage(AttendeeRegistered.EVENT, handleAttendeeRegistered);
   this.onMessage(AttendeeEmailChanged.EVENT, handleAttendeeEmailChanged);
   this.onMessage(AttendeeChangeEmailConfirmed.EVENT, handleAttendeeChangeEmailConfirmed);
-  this.onMessage(AttendeeConfirmChangeEmailFailed.EVENT, handleAttendeeConfirmChangeEmailFailed);
 
-}
-
-/*
-handle the event that is published when a user attempts to
-confirm a changed email address when the confirmation Id does
-not match the most recent email change request
-*/
-function handleAttendeeConfirmChangeEmailFailed(event){
-
-  console.log("handling " + event.name);
-
-  //send an email to the attendee informing them that the confirmation failed.
 }
 
 /*
