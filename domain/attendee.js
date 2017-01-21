@@ -24,19 +24,10 @@ function Attendee(id){
   this._confirmationId = null;
 
   /*
-  represents the current email address.
-  */
-  this._email = null;
-
-  /*
   represents the unconfirmed email address that the user
   made a request to change to
   */
   this._unconfirmedEmail = null;
-
-  this.onEvent(AttendeeRegistered.EVENT, function(event) {
-    this._email = event.email;
-  }.bind(this));
 
   this.onEvent(AttendeeEmailChanged.EVENT, function(event) {
     this._confirmationId = event.confirmationId;
@@ -44,7 +35,6 @@ function Attendee(id){
   }.bind(this));
 
   this.onEvent(AttendeeChangeEmailConfirmed.EVENT, function(event) {
-    this._email = event.email;
     this._confirmationId = null;
     this._unconfirmedEmail = null;
   }.bind(this));
