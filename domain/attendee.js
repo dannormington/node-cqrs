@@ -5,7 +5,7 @@ var AttendeeChangeEmailConfirmed = require('./events/attendeeChangeEmailConfirme
 var AttendeeConfirmChangeEmailFailed = require('./events/attendeeConfirmChangeEmailFailed.js');
 
 var util = require("util");
-var uuid = require("node-uuid");
+var uuid = require("uuid/v4");
 
 util.inherits(Attendee, AggregateRoot);
 
@@ -25,21 +25,23 @@ function Attendee(id){
   this._confirmationId = null;
 
   /*
-  represents the most recent unconfirmed email address
-  that the attendee changed in the system.
+  represents the current email address.
   */
-  this._unconfirmedEmail = null;
+  this._email = null;
+
+  this.onEvent(AttendeeRegistered.EVENT, function(event) {
+    this._email = event.email;
+  }.bind(this));
 
   this.onEvent(AttendeeEmailChanged.EVENT, function(event) {
     //assign the confirmation Id and email
     this._confirmationId = event.confirmationId;
-    this._unconfirmedEmail = event.email;
+    this._email = event.email;
   }.bind(this));
 
   this.onEvent(AttendeeChangeEmailConfirmed.EVENT, function(/*event*/) {
     //reset the Id and email to null since the confirmation has occurred
     this._confirmationId = null;
-    this._unconfirmedEmail = null;
   }.bind(this));
 
 }
@@ -63,7 +65,7 @@ Attendee.prototype.changeEmail = function(email){
 
   //validate the email exists
   if(email && email.trim().length > 0){
-    this.applyChange(new AttendeeEmailChanged(uuid.v4(), this.getId(), email.trim().toLowerCase()));
+    this.applyChange(new AttendeeEmailChanged(uuid(), this.getId(), email.trim().toLowerCase()));
   }
 
 };
@@ -71,7 +73,7 @@ Attendee.prototype.changeEmail = function(email){
 Attendee.prototype.confirmChangeEmail = function(confirmationId){
 
   if(confirmationId === this._confirmationId){
-    this.applyChange(new AttendeeChangeEmailConfirmed(this.getId(), confirmationId, this._unconfirmedEmail));
+    this.applyChange(new AttendeeChangeEmailConfirmed(this.getId(), confirmationId, this._email));
   }else{
     this.applyChange(new AttendeeConfirmChangeEmailFailed(this.getId(), confirmationId));
   }

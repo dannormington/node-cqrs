@@ -85,7 +85,9 @@ app.post('/attendees/register', function(req, res){
 
   res.type('text/plain');
 
-  messageBus.send(RegisterAttendee.COMMAND, req.body, function(err, exception){
+  var command = new RegisterAttendee(req.body.attendeeId, req.body.firstName, req.body.lastName, req.body.email);
+
+  messageBus.send(RegisterAttendee.COMMAND, command, function(err, exception){
     if(err){
       res.status(exception ? 500 : 400).send(err.message);
     }else{
@@ -100,8 +102,7 @@ app.post('/attendees/:id/changeemail', function(req, res){
 
   res.type('text/plain');
 
-  var command = req.body;
-  command.id = req.params.id;
+  var command = new ChangeEmail(req.params.id, req.body.email);
 
   messageBus.send(ChangeEmail.COMMAND, command, function(err, exception){
     if(err){
@@ -118,8 +119,7 @@ app.post('/attendees/:id/confirmchangeemail', function(req, res){
 
   res.type('text/plain');
 
-  var command = req.body;
-  command.id = req.params.id;
+  var command = new ConfirmChangeEmail(req.params.id, req.body.confirmationId);
 
   messageBus.send(ConfirmChangeEmail.COMMAND, command, function(err, exception){
     if(err){

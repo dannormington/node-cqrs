@@ -33,7 +33,7 @@ function handleConfirmChangeEmail(command, callback){
     return;
   }
 
-  repository.getById(command.id, function(err, attendee){
+  repository.getById(command.attendeeId, function(err, attendee){
     if(err){
       callback(err, true);
     }else{
@@ -71,7 +71,7 @@ function handleChangeEmail(command, callback){
         callback(new Error('email already exists.'), false);
       }else{
 
-        repository.getById(command.id, function(err, attendee){
+        repository.getById(command.attendeeId, function(err, attendee){
           if(err){
             callback(err, true);
           }else{
@@ -95,11 +95,11 @@ function handleChangeEmail(command, callback){
 //handles the registration of an attendee
 function handleRegisterAttendee(command, callback){
   //validate the command
-  if(!command || !command.firstName || !command.lastName || !command.email || !command.id ||
+  if(!command || !command.firstName || !command.lastName || !command.email || !command.attendeeId ||
     command.firstName.trim().length === 0 ||
     command.lastName.trim().length === 0 ||
     command.email.trim().length === 0 ||
-    command.id.toString().trim().length === 0){
+    command.attendeeId.toString().trim().length === 0){
 
     callback(new Error('invalid parameters'),false);
 
@@ -117,7 +117,7 @@ function handleRegisterAttendee(command, callback){
         callback(new Error('email already exists.'), false);
       }else{
 
-        var attendee = new Attendee(command.id).init(command.firstName, command.lastName, command.email);
+        var attendee = new Attendee(command.attendeeId).init(command.firstName, command.lastName, command.email);
 
         repository.save(attendee, function(err){
 
